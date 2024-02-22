@@ -1,28 +1,23 @@
 const accessModel = require("../models/accessModel");
 
 const rateLimiting = async (req, res, next) => {
-  console.log(req.session.id);
   const sessionId = req.session.id;
-
   //find the entry with sessionId
 
   try {
-    const accessDb = await accessModel.findOne({ sessionId });
+    const accessDb = await accessModel.findOne({ sessionId: sessionId });
 
     //check if it is first request
     if (!accessDb) {
       const acccessObj = new accessModel({
-        sessionId,
+        sessionId: sessionId,
         time: Date.now(),
       });
       //create an entry inside the Db
       await acccessObj.save();
-      console.log("inside", accessDb);
       next();
       return;
     }
-
-    console.log((Date.now() - accessDb.time) / 1000);
 
     const diff = (Date.now() - accessDb.time) / 1000;
 
